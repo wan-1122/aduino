@@ -1,0 +1,131 @@
+// Keyboard - Version: Latest
+#include <Keyboard.h>
+#include <Mouse.h>
+#include <ArduinoJson.h>
+
+boolean ok = true;
+ 
+// 실행시 가장 먼저 호출되는 함수이며, 최초 1회만 실행됩니다.
+void setup() {
+  // 키보드 설정을 제어합니다.:
+  Keyboard.begin();
+  
+  // initialize mouse control:
+  Mouse.begin();
+
+	//client-server 체크 시간 available 대기 시간이라고 생각하면 됨
+  Serial.setTimeout(20);
+}
+
+// setup() 함수가 호출된 이후, loop() 함수가 호출되며,
+// 블록 안의 코드를 무한히 반복 실행합니다.
+void loop() {
+    delay(5);
+  if (Serial.available() > 0 && ok) {// 데이터를 입력 받았을 경우
+    String commandStr = Serial.readString();
+    ok = false;
+
+    DynamicJsonDocument doc(1024); 
+    // Deserialize the JSON document : Json문서 분석
+    DeserializationError error = deserializeJson(doc, commandStr);
+   
+    // Test if parsing succeeds. : 파싱 에러 발생 시 출력
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      return;
+    }
+ 
+  // Fetch values.
+  // Most of the time, you can rely on the implicit casts.
+  // In other case, you can do doc["time"].as<long>();
+    JsonArray array = doc["commands"];
+    
+    for(JsonVariant v : array) {
+      String cmd = v.as<String>();
+      
+      if (cmd.startsWith("moveTo")) {
+        //moveTo x y
+        int xDistance = getValue(cmd,' ', 1).toInt();
+        //Serial.println(xDistance);
+        int yDistance = getValue(cmd,' ', 2).toInt();
+        //MouseTo.setTarget(xDistance, yDistance);
+  
+        if (xDistance > 50) {
+          int len = xDistance / 50;
+          for (int i = 0; i < len; i++) {
+            Mouse.move(50, 0, 0);
+            xDistance = xDistance - 50;
+          }
+        } else if (xDistance < -50) {
+          int len = -xDistance / 50;
+          for (int i = 0; i < len; i++) {
+            Mouse.move(-50, 0, 0);
+            xDistance = xDistance + 50;
+          }
+        }
+        
+        if (yDistance > 50) {
+          int len = yDistance / 50;
+          for (int i = 0; i < len; i++) {
+            Mouse.move(0, 50, 0);
+            yDistance = yDistance - 50;
+          }
+        } else if (yDistance < -50) {
+          int len = -yDistance / 50;
+          for (int i = 0; i < len; i++) {
+            Mouse.move(0, -50, 0);
+            yDistance = yDistance + 50;
+          }
+        }
+        Mouse.move(xDistance, yDistance, 0);
+      } else if (cmd.startsWith("click")) {
+        //while (MouseTo.move() == false) {}
+        Mouse.click();
+      } else if (cmd.startsWith("doubleclick")) {
+        //just doubleclick!!
+        
+      } else if (cmd.startsWith("alttab")) {
+        //just alt+tab!!
+        Keyboard.releaseAll();
+        Keyboard.press(KEY_LEFT_ALT);
+        Keyboard.press(KEY_TAB);
+        Keyboard.releaseAll();
+        delay(10);
+      } else if (cmd.startsWith("sleep")) {
+        //just sleep!!
+        
+        int sleepTime = getValue(cmd,' ', 1).toInt();
+          delay(sleepTime);
+      } else if (cmd.startsWith("keypress")) {
+        //keypress 111
+        String text = getValue(cmd,' ', 1);
+        int len = text.length();
+        for (int i = 0; i < len; i++) {
+          Keyboard.write(text.charAt(i));
+          delay(10);
+        }
+      }
+      delay(10);
+    }
+    Serial.println("ok");
+    ok = true;
+  }
+}
+
+String getValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length()-1;
+
+  for(int i=0; i<=maxIndex && found<=index; i++){
+    if(data.charAt(i)==separator || i==maxIndex){
+        found++;
+        strIndex[0] = strIndex[1]+1;
+        strIndex[1] = (i == maxIndex) ? i+1 : i;
+    }
+  }
+
+  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+}

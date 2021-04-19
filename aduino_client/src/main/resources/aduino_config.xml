@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<port>39600</port>
+	<sleep_time>50</sleep_time>
+	<commands>
+		<command>click 1632 700</command>
+		<command>click</command>
+		<command>keypress %s</command>
+		<command>sleep 50</command>
+		<command>moveTo 0 35</command>
+		<command>sleep 50</command>
+		<command>click</command>
+		<command>sleep 50</command>
+	</commands>	
+</root>
