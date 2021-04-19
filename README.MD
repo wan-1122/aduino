@@ -17,11 +17,13 @@ aduino_server build path를 아래와 같이 설정 합니다.
  
 
 ## 실행하기
-1. 아두이노를 연결 후 aduino_keyboard 컴파일 후 업로드
-2. 아두이노 com port 찾을 것!(소스에서 COM9)
-3. 찾은 com port로 아두이노 서버 동작
-4. aduion_client에서 aduino_config.xml로 아두이노 서버 port 설정 및 command 실행
-5. aduion_client 실행
+ 1. 아두이노를 연결 후 aduino_keyboard 컴파일 후 업로드
+ 2. 아두이노 com port 찾을 것!(소스에서 COM9)
+![image](https://user-images.githubusercontent.com/82796693/115208199-46523d00-a137-11eb-9e0d-1e682d63ce10.png)
+
+ 3. 찾은 com port로 아두이노 서버 동작
+ 4. aduion_client에서 aduino_config.xml로 아두이노 서버 port 설정 및 command 실행
+ 5. aduion_client 실행
 
 
 # 작성일자
